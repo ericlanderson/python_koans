@@ -103,21 +103,21 @@ class AboutMethods(Koan):
         pass
 
     def test_methods_that_do_nothing_need_to_use_pass_as_a_filler(self):
-        self.assertEqual(__, self.empty_method())
+        self.assertEqual(None, self.empty_method())
 
     def test_pass_does_nothing_at_all(self):
         "You"
         "shall"
         "not"
         pass
-        self.assertEqual(____, "Still got to this line" != None)
+        self.assertEqual(True, "Still got to this line" != None)
 
     # ------------------------------------------------------------------
 
     def one_line_method(self): return 'Madagascar'
 
     def test_no_indentation_required_for_one_line_statement_bodies(self):
-        self.assertEqual(__, self.one_line_method())
+        self.assertEqual('Madagascar', self.one_line_method())
 
     # ------------------------------------------------------------------
 
@@ -126,7 +126,7 @@ class AboutMethods(Koan):
         return "ok"
 
     def test_the_documentation_can_be_viewed_with_the_doc_method(self):
-        self.assertRegex(self.method_with_documentation.__doc__, __)
+        self.assertRegex(self.method_with_documentation.__doc__, "A string placed at the beginning of a function is used for documentation")
 
     # ------------------------------------------------------------------
 
@@ -143,20 +143,20 @@ class AboutMethods(Koan):
 
     def test_calling_methods_in_other_objects(self):
         rover = self.Dog()
-        self.assertEqual(__, rover.name())
+        self.assertEqual("Fido", rover.name())
 
     def test_private_access_is_implied_but_not_enforced(self):
         rover = self.Dog()
 
         # This is a little rude, but legal
-        self.assertEqual(__, rover._tail())
+        self.assertEqual("wagging", rover._tail())
 
     def test_attributes_with_double_underscore_prefixes_are_subject_to_name_mangling(self):
         rover = self.Dog()
-        with self.assertRaises(___): password = rover.__password()
+        with self.assertRaises(AttributeError): password = rover.__password()
 
         # But this still is!
-        self.assertEqual(__, rover._Dog__password())
+        self.assertEqual('password', rover._Dog__password())
 
         # Name mangling exists to avoid name clash issues when subclassing.
         # It is not for providing effective access protection
