@@ -18,7 +18,16 @@
 #
 def triangle(a, b, c):
     # DELETE 'PASS' AND WRITE THIS CODE
-    pass
+    if a <= 0 or b <= 0 or c <= 0:
+      raise TriangleError("All sides should be greater than 0") 
+    elif a + b <= c or a + c <= b or b + c <= a:
+      raise TriangleError("The sum of two sides should be greather than the third")
+    elif a == b == c:
+      return "equilateral"
+    elif a == b or b == c or c == a:
+      return 'isosceles'
+    else:
+      return 'scalene'
 
 # Error class used in part 2.  No need to change this code.
 class TriangleError(Exception):
