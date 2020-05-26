@@ -203,7 +203,6 @@ while not game.over:
         turn_score = 0
         scratched = False
         player.scratched = False
-        turn_is_over = False
 
         # If this is the final round, play until you beat the leader or scratch ...            
         if game.final_round:
@@ -220,7 +219,6 @@ while not game.over:
                 if player.score > game.leader.score:
                     game.leader = player
                     print(game.leader.name,"is the new leader.")
-
             else:
                 print(player.name,"scratched and lost",turn_score,"points.")
 
@@ -238,6 +236,7 @@ while not game.over:
             else:
                 print(player.name,"failed to get on the board with", turn_score,"points")
 
+        # Taking a normal game turn
         else:
             print(player.name, "is taking a turn and currently has",player.score,"points.")
 
@@ -249,6 +248,9 @@ while not game.over:
                 player.score += turn_score
                 print(player.name,"will stop with",remaining_dice,"dice remaining and scored",turn_score,"points.")
                 print(player.name,"now has", player.score,"points.")
+                if player.score > game.leader.score:
+                    game.leader = player
+                    print(game.leader.name,"is the new leader.")
             else:
                 print(player.name,"scratched and will score 0 points.")
                     
