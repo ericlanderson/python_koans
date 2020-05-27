@@ -208,7 +208,6 @@ while not game.over:
         if game.final_round:
             print(player.name,"is taking their final turn and currently has",player.score,"points.")
             while player.score + turn_score < game.leader.score \
-                  and remaining_dice > 0 \
                   and not player.scratched:
                 player, remaining_dice, turn_score = take_turn(player,remaining_dice,turn_score)
              
@@ -227,7 +226,7 @@ while not game.over:
             print(player.name,"is trying to get on the board.")
             
             # keep rolling until we have > 300 
-            while remaining_dice > 0 and turn_score < 300 and not player.scratched:
+            while turn_score < 300 and not player.scratched:
                 player, remaining_dice, turn_score = take_turn(player,remaining_dice,turn_score)
                    
             if turn_score >= 300:
