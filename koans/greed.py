@@ -12,14 +12,19 @@
 
 import random
 
+#############################################
+# Class Player
+#############################################
 class Game:
-    def __init__(self,names):
+    def __init__(self,names,min_score,max_score):
         self._players = []
         self.round = 1
         self.over = False
         self._message = ""
         self.final_round = False
         self.leader = Player()
+        self.min_score = min_score
+        self.max_score = max_score
         for name in names:
             print("Adding ",name, " to the game.")
             self._players.append(Player(name))
@@ -59,9 +64,79 @@ class Game:
 
             self.round += 1
 
+
     def end(self):
         print("******************************************************")
         print("After",self.round,"rounds,",self.leader.name,"is the winner with",self.leader.score,"points.")
+
+    def play(self):
+        while not self.over: 
+
+            if self.leader.score >= self.max_score:
+                self.final_round = True
+                self.remove_player(self.leader)
+                self.message = "(final round)"
+
+            print("******************************************************")
+            print("Round:",self.round,self.message)
+
+            for player in self.players:
+                
+                self.take_turn(player)        
+                            
+            self.next_round()
+
+        self.end()
+
+    def take_turn(self,player):
+
+        player.scratched = False
+        turn_over = False
+        turn_score = 0
+        remaining_dice = 5
+        message = "."
+
+        print(player.name,"is taking their turn and currently has",player.score,"points.")
+
+        while not turn_over:
+            dice = DiceSet()
+            dice.roll(remaining_dice)
+            print(player.name,"rolled",dice.values,"which is",dice.score,"points.")
+            if dice.score > 0:
+                turn_score += dice.score
+                # Final turn
+                if self.final_round:
+                    if player.score + turn_score > self.leader.score:
+                        turn_over = True
+                # Regular turn
+                elif player.score > self.min_score:
+                    if dice.remaining == 1:
+                        turn_over = True
+                # Not on the board
+                else:
+                    if turn_score >= self.min_score:
+                        turn_over = True
+                        print(player.name,"got on the board with", turn_score,"points")
+
+                if dice.remaining == 0:
+                    remaining_dice = 5
+                else:
+                    remaining_dice = dice.remaining
+            else:
+                player.scratched=True
+                turn_over = True
+
+        if player.scratched:
+            print(player.name,"scratched and lost",turn_score,"points.")
+        else:
+            player.score += turn_score
+
+            if player.score > self.leader.score:
+                self.leader = player
+                message = "and is now the leader."
+
+            print(player.name,"ends with",remaining_dice,"dice remaining and scored",turn_score,"points.")
+            print(player.name,"now has", player.score,"points",message)
 
     @property
     def message(self):
@@ -71,6 +146,9 @@ class Game:
     def message(self,msg):
         self._message = msg
 
+###########################################################
+# Class Player
+###########################################################
 class Player:
     def __init__(self,name = "None", score = 0):
         self._name = name
@@ -105,7 +183,9 @@ class Player:
     @message.setter
     def message(self,msg):
         self._message = msg
-
+###########################################################
+# Class DiceSet
+###########################################################
 class DiceSet:
     def __init__(self):
         self._values = None
@@ -167,92 +247,17 @@ class DiceSet:
         self._score = score
         self._remaining = remaining
 
-def take_turn(player,remaining_dice,turn_score):
-    dice = DiceSet()
-    dice.roll(remaining_dice)
-    print(player.name,"rolled",dice.values,"which is",dice.score,"points.")
-    if dice.score > 0:
-        turn_score += dice.score
-        if dice.remaining > 0:
-            remaining_dice = dice.remaining
-        else:
-            remaining_dice = 5
-    else:
-        player.scratched=True
-    
-    return player, remaining_dice, turn_score
-
+###########################################################
+# Main ...
+###########################################################
+min_score = 300
 max_score = 3000
 
+# Our list of players
 players = ["Andy","Candy","Mandy","Sandy","Glenn Dandy"]
-game = Game(players)
 
-while not game.over: 
+# Create our game with the players
+game = Game(players, min_score, max_score)
 
-    if game.leader.score >= max_score:
-        game.final_round = True
-        game.remove_player(game.leader)
-        game.message = "(final round)"
-
-    print("******************************************************")
-    print("Round:",game.round,game.message)
-
-    for player in game.players:
-        
-        remaining_dice = 5
-        turn_score = 0
-        scratched = False
-        player.scratched = False
-
-        # If this is the final round, play until you beat the leader or scratch ...            
-        if game.final_round:
-            print(player.name,"is taking their final turn and currently has",player.score,"points.")
-            while player.score + turn_score < game.leader.score \
-                  and not player.scratched:
-                player, remaining_dice, turn_score = take_turn(player,remaining_dice,turn_score)
-             
-            if not player.scratched:
-                player.score += turn_score
-                print(player.name,"ends with",remaining_dice,"dice remaining and scored",turn_score,"points.")
-                print(player.name,"now has", player.score,"points.")
-                if player.score > game.leader.score:
-                    game.leader = player
-                    print(game.leader.name,"is the new leader.")
-            else:
-                print(player.name,"scratched and lost",turn_score,"points.")
-
-        # Does this player still need to get on the board?
-        elif player.score < 300:
-            print(player.name,"is trying to get on the board.")
-            
-            # keep rolling until we have > 300 
-            while turn_score < 300 and not player.scratched:
-                player, remaining_dice, turn_score = take_turn(player,remaining_dice,turn_score)
-                   
-            if turn_score >= 300:
-                player.score = turn_score
-                print(player.name,"got on the board with", player.score,"points")
-            else:
-                print(player.name,"failed to get on the board with", turn_score,"points")
-
-        # Taking a normal game turn
-        else:
-            print(player.name, "is taking a turn and currently has",player.score,"points.")
-
-            # Regular turn but stop when one die remains.
-            while remaining_dice > 1 and not player.scratched:
-                player, remaining_dice, turn_score = take_turn(player,remaining_dice,turn_score)
-             
-            if not player.scratched:
-                player.score += turn_score
-                print(player.name,"will stop with",remaining_dice,"dice remaining and scored",turn_score,"points.")
-                print(player.name,"now has", player.score,"points.")
-                if player.score > game.leader.score:
-                    game.leader = player
-                    print(game.leader.name,"is the new leader.")
-            else:
-                print(player.name,"scratched and will score 0 points.")
-                    
-    game.next_round()
-
-game.end()
+# play the game
+game.play()
